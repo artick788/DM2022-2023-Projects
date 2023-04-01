@@ -39,11 +39,11 @@ if __name__ == '__main__':
     # Train the classifier on the customers dataset using all columns except the last one which is salary
     classifier.fit(customers.iloc[:, :-1], customers.iloc[:, -1])
     # Predict the potential customers salary
-    predictions = classifier.predict(potential_customers.iloc[:, :-1])
+    predictions = classifier.predict(potential_customers.iloc[:, :])
 
-    # Print the predictions
-    print(predictions)
+    potential_customers['pred_class'] = predictions
+    ids = potential_customers.loc[potential_customers['pred_class'] == 1].index
 
-
-    x: int = 0
-
+    with open("RowIDs.txt", "w") as f:
+        for id in ids:
+            f.write(str(id) + "\n")
