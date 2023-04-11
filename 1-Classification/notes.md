@@ -10,3 +10,7 @@ likelihood of positive reaction to the special promotion and the average return 
 1. We have an existing customers table, and we have a potential customers table. Of all given features in the existing customers
 table, we want to predict the reaction of all the potential customers to the special promotion. We will use Naive Bayes to predict
 
+## Approach 3: Confusion matrix
+1. Split the existing customers table into training and test sets.
+2. Train a Naive Bayes model on the training set.
+3. create confusion matrix and user the TP and TN to calculate the accuracy of the model.
