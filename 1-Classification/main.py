@@ -15,7 +15,7 @@ def create_confusion_matrix(classifier, train, validation):
     actual = validation.iloc[:, -1]
 
     # cm = pd.crosstab(actual, predictions, rownames=['Actual'], colnames=['Predicted'])
-    cm = confusion_matrix(actual, predictions, labels=[1, 0])
+    cm = confusion_matrix(actual, predictions, labels=[1, 0], normalize='all')
     tn, fp, fn, tp = cm.ravel()
     return tn, fp, fn, tp
 
@@ -27,8 +27,26 @@ def main():
     train, validation = train_test_split(customers, test_size=0.2, random_state=42)
 
     # train and validate the classifiers
-    classifier: GaussianNB = GaussianNB()
-    create_confusion_matrix(classifier, train, validation)
+    classifier: DecisionTreeClassifier = DecisionTreeClassifier()
+    tn, fp, fn, tp = create_confusion_matrix(classifier, train, validation)
+    print(f'GaussianNB: tn={tn}, fp={fp}, fn={fn}, tp={tp}')
+
+    # predict the potential customers
+    potential_customers: pd.DataFrame = read_excel('data/potential-customers.xlsx')
+    predictions = classifier.predict(potential_customers.iloc[:, :])
+    potential_customers['pred_class'] = predictions
+    ids = potential_customers.loc[potential_customers['pred_class'] == 1].index
+
+    with open("RowIDs.txt", "w") as f:
+        for id in ids:
+            f.write(str(id) + "\n")
+
+    # calculate estimated revenue
+    sent_packages = len(ids)
+    positive_revenue = (sent_packages * tp) * ((0.1 * 980) - 10)
+    negative_revenue = (sent_packages * fp) * ((0.1 * -310) - 10)
+    estimated_revenue = positive_revenue + negative_revenue
+    print(f'Estimated revenue: {estimated_revenue}')
 
 
 if __name__ == "__main__":
