@@ -47,6 +47,9 @@ def main():
     negative_revenue = (sent_packages * fp) * ((0.1 * -310) - 10)
     estimated_revenue = positive_revenue + negative_revenue
     print(f'Estimated revenue: {estimated_revenue}')
+    print(f'Total packages sent: {sent_packages}')
+    print(f'TP packages: {tp * sent_packages}')
+    print(f'FP packages: {fp * sent_packages}')
 
 
 if __name__ == "__main__":
