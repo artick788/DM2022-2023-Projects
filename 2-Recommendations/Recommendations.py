@@ -56,9 +56,17 @@ def main():
     min_support = 0.2
     min_confidence = 0.5
     min_lift = 1.0
+    rules = association_rules_average_confidence(transactions, min_support, min_confidence)
+    recommended_items = recommend_items(input_items, rules)
+    print("Recommended items avg confidence:", recommended_items)
+
+    rules = association_rules_lift(transactions, min_support, min_lift)
+    recommended_items = recommend_items(input_items, rules)
+    print("Recommended items lift:", recommended_items)
+
     rules = association_rules_conviction(transactions, min_support)
     recommended_items = recommend_items(input_items, rules)
-    print("Recommended items:", recommended_items)
+    print("Recommended items conviction:", recommended_items)
 
 
 if __name__ == "__main__":

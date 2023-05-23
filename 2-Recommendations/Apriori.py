@@ -81,10 +81,12 @@ def association_rules_conviction(transactions, min_support=0.3):
             support_antecedent_consequent = len([t for t in transactions if antecedent.union(consequent).issubset(t)]) / len(transactions)
             confidence = support_antecedent_consequent / support_antecedent
 
-            if confidence != 1:
+            if confidence > 1:
                 conviction = (1 - support_consequent) / (1 - confidence)
-            else:
+            elif confidence == 1:
                 conviction = float('inf')
+            else:
+                continue
 
             rules.append((antecedent, consequent, support_antecedent_consequent, conviction))
     return rules
