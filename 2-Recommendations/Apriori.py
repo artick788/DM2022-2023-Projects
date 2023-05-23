@@ -36,7 +36,7 @@ def apriori(transactions, min_support):
     return frequent_itemsets, itemsets_by_length
 
 
-def association_rules(transactions, min_support=0.3, min_confidence=0.7):
+def association_rules_average_confidence(transactions, min_support=0.3, min_confidence=0.7):
     frequent_itemsets, itemsets_by_length = apriori(transactions, min_support)
     rules = []
     for itemset in frequent_itemsets:
@@ -46,28 +46,46 @@ def association_rules(transactions, min_support=0.3, min_confidence=0.7):
             support_antecedent = len([t for t in transactions if antecedent.issubset(t)]) / len(transactions)
             support_itemset = len([t for t in transactions if itemset.issubset(t)]) / len(transactions)
             confidence = support_itemset / support_antecedent
+
             if confidence >= min_confidence:
                 rules.append((antecedent, consequent, support_itemset, confidence))
     return rules
 
 
-def main():
-    # Example usage
-    transactions = [
-        {"A", "B", "C"},
-        {"A", "B"},
-        {"A", "C"},
-        {"A"},
-        {"B", "C"},
-        {"B"},
-        {"C"},
-    ]
-    min_support = 0.3
-    min_confidence = 0.7
-    rules = association_rules(transactions, min_support, min_confidence)
-    for antecedent, consequent, support, confidence in rules:
-        print(f"{antecedent} => {consequent} (support={support:.2f}, confidence={confidence:.2f})")
+def association_rules_lift(transactions, min_support=0.3, min_lift=1.0):
+    frequent_itemsets, itemsets_by_length = apriori(transactions, min_support)
+    rules = []
+    for itemset in frequent_itemsets:
+        for subset in filterfalse(lambda x: not x, powerset(itemset)):
+            antecedent = frozenset(subset)
+            consequent = itemset - antecedent
+            support_antecedent = len([t for t in transactions if antecedent.issubset(t)]) / len(transactions)
+            support_consequent = len([t for t in transactions if consequent.issubset(t)]) / len(transactions)
+            support_antecedent_consequent = len([t for t in transactions if antecedent.union(consequent).issubset(t)]) / len(transactions)
+            lift = support_antecedent_consequent / (support_antecedent * support_consequent)
+
+            if lift > min_lift:
+                rules.append((antecedent, consequent, support_antecedent_consequent, lift))
+    return rules
 
 
-if __name__ == "__main__":
-    main()
+def association_rules_conviction(transactions, min_support=0.3):
+    frequent_itemsets, itemsets_by_length = apriori(transactions, min_support)
+    rules = []
+    for itemset in frequent_itemsets:
+        for subset in filterfalse(lambda x: not x, powerset(itemset)):
+            antecedent = frozenset(subset)
+            consequent = itemset - antecedent
+            support_antecedent = len([t for t in transactions if antecedent.issubset(t)]) / len(transactions)
+            support_consequent = len([t for t in transactions if consequent.issubset(t)]) / len(transactions)
+            support_antecedent_consequent = len([t for t in transactions if antecedent.union(consequent).issubset(t)]) / len(transactions)
+            confidence = support_antecedent_consequent / support_antecedent
+
+            if confidence != 1:
+                conviction = (1 - support_consequent) / (1 - confidence)
+            else:
+                conviction = float('inf')
+
+            rules.append((antecedent, consequent, support_antecedent_consequent, conviction))
+    return rules
+
