@@ -1,73 +1,41 @@
-from itertools import chain, combinations, filterfalse
+from itertools import combinations
 
 
-def powerset(iterable):
-    s = list(iterable)
-    return chain.from_iterable(combinations(s, r) for r in range(1, len(s) + 1))
+def generate_candidates(frequent_itemsets, k):
+    candidates = set()
+    for itemset1 in frequent_itemsets:
+        for itemset2 in frequent_itemsets:
+            union_set = itemset1.union(itemset2)
+            if len(union_set) == k:
+                candidates.add(union_set)
+    return candidates
 
 
-def join_set(itemsets, k):
-    return set(
-        [itemset1.union(itemset2) for itemset1 in itemsets for itemset2 in itemsets if len(itemset1.union(itemset2)) == k]
-    )
-
-
-def itemsets_support(transactions, itemsets, min_support):
-    support_count = {itemset: 0 for itemset in itemsets}
-    for transaction in transactions:
-        for itemset in itemsets:
-            if itemset.issubset(transaction):
-                support_count[itemset] += 1
-    n_transactions = len(transactions)
-    return {itemset: support / n_transactions for itemset, support in support_count.items() if support / n_transactions >= min_support}
+def prune_candidates(candidates, frequent_itemsets):
+    pruned_candidates = set()
+    for candidate in candidates:
+        subsets = combinations(candidate, len(candidate) - 1)
+        if all(subset in frequent_itemsets for subset in subsets):
+            pruned_candidates.add(candidate)
+    return pruned_candidates
 
 
 def apriori(transactions, min_support):
-    items = set(chain(*transactions))
-    itemsets = [frozenset([item]) for item in items]
-    itemsets_by_length = []
-    k = 1
+    itemsets = [frozenset([item]) for transaction in transactions for item in transaction]
+    frequent_itemsets = []
+    min_support_count = len(transactions) * min_support
+
     while itemsets:
-        support_count = itemsets_support(transactions, itemsets, min_support)
-        itemsets_by_length.append(set(support_count.keys()))
-        k += 1
-        itemsets = join_set(itemsets, k)
-    frequent_itemsets = set(chain(*itemsets_by_length))
-    return frequent_itemsets, itemsets_by_length
+        item_counts = {}
+        candidates = generate_candidates(itemsets, len(itemsets[0]) + 1)
+        pruned_candidates = prune_candidates(candidates, itemsets)
 
+        for transaction in transactions:
+            for candidate in pruned_candidates:
+                if candidate.issubset(transaction):
+                    item_counts[candidate] = item_counts.get(candidate, 0) + 1
 
-def association_rules(transactions, min_support=0.3, min_confidence=0.7):
-    frequent_itemsets, itemsets_by_length = apriori(transactions, min_support)
-    rules = []
-    for itemset in frequent_itemsets:
-        for subset in filterfalse(lambda x: not x, powerset(itemset)):
-            antecedent = frozenset(subset)
-            consequent = itemset - antecedent
-            support_antecedent = len([t for t in transactions if antecedent.issubset(t)]) / len(transactions)
-            support_itemset = len([t for t in transactions if itemset.issubset(t)]) / len(transactions)
-            confidence = support_itemset / support_antecedent
-            if confidence >= min_confidence:
-                rules.append((antecedent, consequent, support_itemset, confidence))
-    return rules
+        frequent_itemsets.extend([itemset for itemset, count in item_counts.items() if count >= min_support_count])
+        itemsets = list(frequent_itemsets)
 
-
-def main():
-    # Example usage
-    transactions = [
-        {"A", "B", "C"},
-        {"A", "B"},
-        {"A", "C"},
-        {"A"},
-        {"B", "C"},
-        {"B"},
-        {"C"},
-    ]
-    min_support = 0.3
-    min_confidence = 0.7
-    rules = association_rules(transactions, min_support, min_confidence)
-    for antecedent, consequent, support, confidence in rules:
-        print(f"{antecedent} => {consequent} (support={support:.2f}, confidence={confidence:.2f})")
-
-
-if __name__ == "__main__":
-    main()
+    return frequent_itemsets

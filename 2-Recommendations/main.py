@@ -1,7 +1,7 @@
 import Apriori as AP1
 import AprioriFix as AP2
 from utils import *
-from CompareAssociationRules import plot_support, plot_confidence, plot_lift
+from AssociationRules import *
 
 MIN_SUPPORT = 0.3
 MIN_CONFIDENCE = 0.7
@@ -12,8 +12,8 @@ def main():
     transactions = [
         {"A", "B", "C"},
         {"A", "B"},
-        {"A", "C", "B"},
-        {"A", "B"},
+        {"A", "C"},
+        {"A"},
         {"B", "C"},
         {"B"},
         {"C"},
@@ -24,16 +24,9 @@ def main():
     print("=====================confidence===================")
     rules = AP1.association_rules_average_confidence(transactions, MIN_SUPPORT, MIN_CONFIDENCE)
     print_rules(rules)
-    print("========================Lift======================")
-    rules = AP1.association_rules_lift(transactions, MIN_SUPPORT, MIN_LIFT)
+    frequent_itemsets, itemsets_by_length = AP1.apriori(transactions, MIN_SUPPORT)
+    rules = association_rules_average_confidence(transactions, frequent_itemsets, MIN_CONFIDENCE)
     print_rules(rules)
-    print("=====================conviction===================")
-    rules = AP1.association_rules_conviction(transactions, MIN_SUPPORT)
-    print_rules(rules)
-
-    plot_support(transactions)
-    plot_confidence(transactions)
-    plot_lift(transactions)
 
 
 
