@@ -1,5 +1,6 @@
 import Apriori as AP1
 import AprioriFix as AP2
+import AprioriPruning as AP3
 from utils import *
 from AssociationRules import *
 
@@ -12,8 +13,8 @@ def main():
     transactions = [
         {"A", "B", "C"},
         {"A", "B"},
-        {"A", "C"},
-        {"A"},
+        {"A", "C", "B"},
+        {"A", "B"},
         {"B", "C"},
         {"B"},
         {"C"},
@@ -21,14 +22,14 @@ def main():
     print("======================Support=====================")
     support = get_support_item(transactions)
     print(support)
-    print("=====================confidence===================")
-    rules = AP1.association_rules_average_confidence(transactions, MIN_SUPPORT, MIN_CONFIDENCE)
-    print_rules(rules)
+    print("=====================Apriori===================")
     frequent_itemsets, itemsets_by_length = AP1.apriori(transactions, MIN_SUPPORT)
     rules = association_rules_average_confidence(transactions, frequent_itemsets, MIN_CONFIDENCE)
     print_rules(rules)
-
-
+    print("=================AprioriPruning================")
+    frequent_itemsets, itemsets_by_length = AP3.apriori(transactions, MIN_SUPPORT)
+    rules = association_rules_average_confidence(transactions, frequent_itemsets, MIN_CONFIDENCE)
+    print_rules(rules)
 
 if __name__ == "__main__":
     main()
