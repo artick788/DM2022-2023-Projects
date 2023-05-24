@@ -1,4 +1,5 @@
-from Apriori import association_rules_average_confidence, association_rules_lift, association_rules_conviction
+from Apriori import apriori
+from AssociationRules import association_rules_average_confidence, association_rules_lift, association_rules_conviction
 
 
 def recommend_items(input_items, rules, top_n=5):
@@ -19,7 +20,7 @@ def recommend_items(input_items, rules, top_n=5):
     return [item for item, _ in sorted_recommendations[:top_n]]
 
 
-def evaluate_recommendations_avg_confidence(test_data, user_items: dict, rules, top_n=5):
+def evaluate_recommendations(test_data, user_items: dict, rules, top_n=5):
     true_positives = 0
     false_positives = 0
     false_negatives = 0
@@ -54,19 +55,22 @@ def main():
         {"C"},
     ]
     min_support = 0.2
-    min_confidence = 0.5
+    min_confidence = 0.4
     min_lift = 1.0
-    rules = association_rules_average_confidence(transactions, min_support, min_confidence)
-    recommended_items = recommend_items(input_items, rules)
-    print("Recommended items avg confidence:", recommended_items)
 
-    rules = association_rules_lift(transactions, min_support, min_lift)
-    recommended_items = recommend_items(input_items, rules)
-    print("Recommended items lift:", recommended_items)
+    frequent_itemsets, itemsets_by_length = apriori(transactions, min_support)
 
-    rules = association_rules_conviction(transactions, min_support)
+    rules = association_rules_average_confidence(transactions, frequent_itemsets, min_confidence)
     recommended_items = recommend_items(input_items, rules)
-    print("Recommended items conviction:", recommended_items)
+    print("Recommended items (confidence):", recommended_items)
+
+    rules = association_rules_lift(transactions, frequent_itemsets, min_lift)
+    recommended_items = recommend_items(input_items, rules)
+    print("Recommended items (lift)      :", recommended_items)
+
+    rules = association_rules_conviction(transactions, frequent_itemsets)
+    recommended_items = recommend_items(input_items, rules)
+    print("Recommended items (conviction):", recommended_items)
 
 
 if __name__ == "__main__":
