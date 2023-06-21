@@ -20,22 +20,19 @@ def recommend_items(input_items, rules, top_n=5):
     return [item for item, _ in sorted_recommendations[:top_n]]
 
 
-def evaluate_recommendations(test_data, user_items: dict, rules, top_n=5):
+def evaluate_recommendations(test_data, user_items, rules, top_n=5):
     true_positives = 0
     false_positives = 0
     false_negatives = 0
     for user, true_items in test_data.items():
         # Assuming user_items is a dictionary with user IDs as keys and their associated items as values
         input_items = user_items[user]
-
         # Get recommendations for the user
         recommended_items = set(recommend_items(input_items, rules, top_n=top_n))
-
         true_items = set(true_items)
         true_positives += len(recommended_items.intersection(true_items))
         false_positives += len(recommended_items - true_items)
         false_negatives += len(true_items - recommended_items)
-
     # Calculate precision, recall, and F1 score
     precision = true_positives / (true_positives + false_positives) if (true_positives + false_positives) > 0 else 0
     recall = true_positives / (true_positives + false_negatives) if (true_positives + false_negatives) > 0 else 0
@@ -43,19 +40,23 @@ def evaluate_recommendations(test_data, user_items: dict, rules, top_n=5):
     return precision, recall, f1_score
 
 
-def main():
-    input_items = {"A", "B"}
+def test_recommendations():
+    input_items = {"A", "B", "E"}
     transactions = [
-        {"A", "B", "C"},
-        {"A", "B"},
-        {"A", "C"},
-        {"A", "C"},
-        {"B", "C"},
-        {"B"},
-        {"C"},
+        {'C', 'A', 'B'},
+        {'C', 'A', 'D', 'E'},
+        {'C', 'A', 'B'},
+        {'A', 'D', 'B'},
+        {'C', 'A', 'E'},
+        {'C', 'A', 'D'},
+        {'A', 'B'},
+        {'C', 'B', 'D', 'E'},
+        {'C', 'B'},
+        {'B', 'E'},
+        {'A', 'B'},
     ]
     min_support = 0.2
-    min_confidence = 0.4
+    min_confidence = 0.5
     min_lift = 1.0
 
     frequent_itemsets, itemsets_by_length = apriori(transactions, min_support)
@@ -74,4 +75,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    test_recommendations()

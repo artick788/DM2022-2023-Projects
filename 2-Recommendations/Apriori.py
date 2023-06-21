@@ -8,7 +8,8 @@ def powerset(iterable):
 
 def join_set(itemsets, k):
     return set(
-        [itemset1.union(itemset2) for itemset1 in itemsets for itemset2 in itemsets if len(itemset1.union(itemset2)) == k]
+        [itemset1.union(itemset2) for itemset1 in itemsets for itemset2 in itemsets if
+         len(itemset1.union(itemset2)) == k]
     )
 
 
@@ -19,7 +20,8 @@ def itemsets_support(transactions, itemsets, min_support):
             if itemset.issubset(transaction):
                 support_count[itemset] += 1
     n_transactions = len(transactions)
-    return {itemset: support / n_transactions for itemset, support in support_count.items() if support / n_transactions >= min_support}
+    return {itemset: support / n_transactions for itemset, support in support_count.items() if
+            support / n_transactions >= min_support}
 
 
 def apriori(transactions, min_support):
