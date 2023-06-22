@@ -17,3 +17,5 @@ add_executable(df
         df/testndi.cpp
         df/qie.cpp
         )
+
+add_executable(Converter Converter.cpp)

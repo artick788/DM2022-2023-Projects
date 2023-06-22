@@ -8,12 +8,18 @@ def powerset(iterable):
 
 def association_rules_average_confidence(transactions, frequent_itemsets, min_confidence=0.7):
     rules = []
+    i = 0
     for itemset in frequent_itemsets:
+        i += 1
+        if i % 1000 == 0:
+            print("Checking itemset", i)
         for subset in filterfalse(lambda x: not x, powerset(itemset)):
             antecedent = frozenset(subset)
             consequent = itemset - antecedent
             support_antecedent = len([t for t in transactions if antecedent.issubset(t)]) / len(transactions)
             support_itemset = len([t for t in transactions if itemset.issubset(t)]) / len(transactions)
+            if support_antecedent == 0:
+                continue
             confidence = support_itemset / support_antecedent
 
             if confidence >= min_confidence:
@@ -23,14 +29,21 @@ def association_rules_average_confidence(transactions, frequent_itemsets, min_co
 
 def association_rules_lift(transactions, frequent_itemsets, min_lift=1.0):
     rules = []
+    i = 0
     for itemset in frequent_itemsets:
+        i += 1
+        if i % 1000 == 0:
+            print("Checking itemset", i)
         for subset in filterfalse(lambda x: not x, powerset(itemset)):
             antecedent = frozenset(subset)
             consequent = itemset - antecedent
             support_antecedent = len([t for t in transactions if antecedent.issubset(t)]) / len(transactions)
             support_consequent = len([t for t in transactions if consequent.issubset(t)]) / len(transactions)
             support_antecedent_consequent = len([t for t in transactions if antecedent.union(consequent).issubset(t)]) / len(transactions)
-            lift = support_antecedent_consequent / (support_antecedent * support_consequent)
+            denominator = support_antecedent * support_consequent
+            if denominator == 0:
+                continue
+            lift = support_antecedent_consequent / denominator
 
             if lift > min_lift:
                 rules.append((antecedent, consequent, support_antecedent_consequent, lift))
@@ -39,7 +52,11 @@ def association_rules_lift(transactions, frequent_itemsets, min_lift=1.0):
 
 def association_rules_conviction(transactions, frequent_itemsets):
     rules = []
+    i = 0
     for itemset in frequent_itemsets:
+        i += 1
+        if i % 1000 == 0:
+            print("Checking itemset", i)
         for subset in filterfalse(lambda x: not x, powerset(itemset)):
             antecedent = frozenset(subset)
             consequent = itemset - antecedent
