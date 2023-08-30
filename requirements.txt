@@ -3,3 +3,4 @@ pandas
 openpyxl
 matplotlib
 numpy
+tqdm==4.66.1
