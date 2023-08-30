@@ -34,6 +34,25 @@ def improved_join_set(itemsets, k):
 
     return new_itemsets
 
+
+def join_set_prune(itemsets, k):
+    new_itemsets = set()
+
+    for itemset1 in itemsets:
+        for itemset2 in itemsets:
+            candidate = itemset1.union(itemset2)
+            if len(candidate) == k + 1:  # Check if candidate size is k
+                is_valid = True
+                subsets = combinations(candidate, k)  # Generate all k-subsets
+                for subset in subsets:
+                    if frozenset(subset) not in itemsets:
+                        is_valid = False
+                        break
+                if is_valid:
+                    new_itemsets.add(candidate)
+
+    return new_itemsets
+
 def itemsets_support(transactions, itemsets, min_support):
     support_count = {itemset: 0 for itemset in itemsets}
     for transaction in transactions:
@@ -53,7 +72,7 @@ def apriori(transactions, min_support):
         support_count = itemsets_support(transactions, itemsets, min_support)
         itemsets_by_length.append(set(support_count.keys()))
         k += 1
-        itemsets = improved_join_set(itemsets, k)
+        itemsets = join_set_prune(itemsets, k)
     frequent_itemsets = set(chain(*itemsets_by_length))
     return frequent_itemsets, itemsets_by_length
 
