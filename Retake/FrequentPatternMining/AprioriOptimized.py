@@ -3,14 +3,9 @@ from time import time, time_ns
 
 
 def powerset(iterable):
+    # generate a powerset of the iterable
     s = list(iterable)
     return chain.from_iterable(combinations(s, r) for r in range(len(s) + 1))
-
-
-def join_set(itemsets, k):
-    return set(
-        [itemset1.union(itemset2) for itemset1 in itemsets for itemset2 in itemsets if len(itemset1.union(itemset2)) == k]
-    )
 
 
 def join_set_prune(itemsets, k):
@@ -19,14 +14,17 @@ def join_set_prune(itemsets, k):
     for itemset1 in itemsets:
         for itemset2 in itemsets:
             candidate = itemset1.union(itemset2)
-            if len(candidate) == k + 1:  # Check if candidate size is k
-                is_valid = True
-                subsets = combinations(candidate, k)  # Generate all k-subsets
-                for subset in subsets:
-                    if frozenset(subset) not in itemsets:
-                        is_valid = False
+            if len(candidate) != k:
+                continue
+            else:
+                pruned_much = False
+                for item in candidate:
+                    subset = candidate - frozenset([item])
+                    if subset not in itemsets:
+                        pruned_much = True
                         break
-                if is_valid:
+
+                if not pruned_much:
                     new_itemsets.add(candidate)
 
     return new_itemsets
@@ -43,15 +41,20 @@ def itemsets_support(transactions, itemsets, min_support):
 
 
 def apriori(transactions, min_support):
+    # perform the apriori algorithm
     items = set(chain(*transactions))
     itemsets = [frozenset([item]) for item in items]
     itemsets_by_length = [set()]
     k = 1
     while itemsets:
+        # get candidates with minimum support
         support_count = itemsets_support(transactions, itemsets, min_support)
         itemsets_by_length.append(set(support_count.keys()))
+        itemsets = list(support_count.keys())
         k += 1
+
         itemsets = join_set_prune(itemsets, k)
+
     frequent_itemsets = set(chain(*itemsets_by_length))
     return frequent_itemsets, itemsets_by_length
 

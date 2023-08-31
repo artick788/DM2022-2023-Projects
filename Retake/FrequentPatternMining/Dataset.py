@@ -14,7 +14,7 @@ class Dataset:
         train_size = int(len(self.dataset) * (1 - VALIDATE_RATIO))
         train_data = self.dataset[:train_size]
 
-        np.random.seed(0)
+        np.random.seed(42)
 
         # create the test dataset
         # get the last element of each of the test dataset elements
