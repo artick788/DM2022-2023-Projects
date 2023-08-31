@@ -1,4 +1,4 @@
-from Apriori import association_rules, association_rules_ext
+from AssociationRules import association_rules, association_rules_ext
 
 
 def recommend_items(input_items, rules, top_n=5):
