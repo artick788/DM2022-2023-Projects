@@ -110,7 +110,7 @@ def task_3():
     }
 
     for min_support in SUPPORTS:
-        rules = association_rules_ndi(train, min_support, 0.01, file_name=f"data/bf_{min_support}.dat")
+        rules = association_rules_ndi(train, 0.01, file_name=f"data/bf_{min_support}.dat")
         precision, recall, f1 = evaluate_recommendations_ext(validate, user_items, rules, 'confidence')
         print(f"min_support={min_support:.3f}, precision={precision:.3f}, recall={recall:.3f}, f1={f1:.3f}")
         results['precision'].append(precision)

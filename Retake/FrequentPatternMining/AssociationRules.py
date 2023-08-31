@@ -47,7 +47,7 @@ def association_rules_ext(transactions, min_support, min_confidence, use_optimiz
     return rules
 
 
-def association_rules_ndi(transactions, min_support, min_confidence, file_name):
+def association_rules_ndi(transactions, min_confidence, file_name):
     frequent_itemsets, itemsets_by_length = read_ndi(file_name)
 
     rules = []

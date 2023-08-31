@@ -23,6 +23,8 @@ def recommend_items_ext(input_items, rules, ranking_method='confidence', top_n=5
     # index of the ranking method in the tuple, stupid but it works
     ranking_index = {'confidence': 0, 'lift': 1, 'conviction': 2, 'leverage': 3, 'jaccard_similarity': 4}
 
+    index = ranking_index[ranking_method]
+
     recommendations = {}
     for antecedent, consequent, support, confidence, lift, conviction, leverage, jaccard_similarity in rules:
         if antecedent.issubset(input_items) and not consequent.issubset(input_items):
@@ -30,8 +32,8 @@ def recommend_items_ext(input_items, rules, ranking_method='confidence', top_n=5
                 if item not in input_items:
                     if item not in recommendations:
                         recommendations[item] = []
-                    ranking_value = (confidence, lift, conviction, leverage, jaccard_similarity)[
-                        ranking_index[ranking_method]]
+                    ranking_value = (confidence, lift, conviction, leverage, jaccard_similarity)[index]
+
                     recommendations[item].append((ranking_value, support))
 
     recommendations = {
