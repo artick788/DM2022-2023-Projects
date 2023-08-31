@@ -1,10 +1,11 @@
-from AssociationRules import association_rules, association_rules_ext
+from AssociationRules import association_rules, association_rules_ext, association_rules_ndi
 from AprioriOptimized import association_rules as association_rules_optimized
 from time import time, time_ns
 from Transactions import transactions, transactions_1, transactions_2
 from Dataset import Dataset
 from EvaluateRecommendations import evaluate_recommendations, evaluate_recommendations_ext
 import matplotlib.pyplot as plt
+from NDI import generate_ndi, read_ndi, SUPPORTS
 
 
 def print_rules(rules):
@@ -98,5 +99,41 @@ def task_2():
         plt.close()
 
 
+def task_3():
+    d = Dataset("data/retail_small.dat")
+    train, validate, user_items = d.split_dataset()
+
+    results: dict = {
+        'precision': [],
+        'recall': [],
+        'f1': []
+    }
+
+    for min_support in SUPPORTS:
+        rules = association_rules_ndi(train, min_support, 0.01, file_name=f"data/bf_{min_support}.dat")
+        precision, recall, f1 = evaluate_recommendations_ext(validate, user_items, rules, 'confidence')
+        print(f"min_support={min_support:.3f}, precision={precision:.3f}, recall={recall:.3f}, f1={f1:.3f}")
+        results['precision'].append(precision)
+        results['recall'].append(recall)
+        results['f1'].append(f1)
+
+    # plot graphs
+    for metric in ['precision', 'recall', 'f1']:
+        plt.figure()
+        plt.title(metric)
+        plt.plot(SUPPORTS, results[metric], label='avg_confidence', marker='o')
+        plt.xlabel('min_support')
+        plt.ylabel(metric)
+        plt.legend()
+        plt.savefig(f"task_3_{metric}.png")
+        plt.close()
+
+
+
 if __name__ == "__main__":
+    print("=================== Task 1 ===================")
+    task_1()
+    print("=================== Task 2 ===================")
     task_2()
+    print("=================== Task 3 ===================")
+    task_3()
